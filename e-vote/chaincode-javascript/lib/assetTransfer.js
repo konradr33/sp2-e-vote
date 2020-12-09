@@ -1,21 +1,16 @@
-/*
- * Copyright IBM Corp. All Rights Reserved.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 'use strict';
 
-const { Contract } = require('fabric-contract-api');
+const {Contract} = require('fabric-contract-api');
+const {v5: uuidv5} = require('uuid');
 
 class AssetTransfer extends Contract {
 
     async InitLedger(ctx) {
         const assets = [];
 
-        this.start =  new Date(2020,5,1);
-        this.estop = new Date(2020,11,20);
-        this.stop = new Date(2020,11,22);
+        this.start = new Date(2020, 5, 1);
+        this.estop = new Date(2020, 11, 20);
+        this.stop = new Date(2020, 11, 22);
 
         // for (const asset of assets) {
         //     asset.docType = 'asset';
@@ -24,37 +19,72 @@ class AssetTransfer extends Contract {
         // }
     }
 
+    async CreatePoll(ctx, pollName, pollStart, pollEnd, candidates, isVoteFinal) {
+        pollStart = parseInt(pollStart);
+        pollEnd = parseInt(pollEnd);
+        isVoteFinal = isVoteFinal == 'true';
+        candidates = JSON.parse(candidates);
 
-    async Vote(ctx, id, optionId, optionName, statData, voteDate, isFinal) {
-        let now= new Date();
-        console.info(`final vote adding${now} ${this.start} ${this.stop}`);
-        if( this.start < now && now <  this.estop  ){
-            console.info(`e-vote adding`);
+        console.info(`CreatePoll: pollName: ${pollName}, pollStart: ${pollStart}, pollEnd: ${pollEnd}, candidates: ${candidates.toString()}, isVoteFinal: ${isVoteFinal}`);
 
-        }else if(isFinal && this.estop < now && now < this.stop){
-            console.info(`final vote adding`);
-        }else{
-            return JSON.stringify({error:"Voting is over"});
+        let now = new Date();
+
+        if (now > pollStart) {
+            console.info(`Cannot create poll that starts in past`);
+            throw new Error('Cannot create poll that starts in past');
+        } else if (now > pollEnd) {
+            console.info(`Cannot create poll that ends in past`);
+            throw new Error('Cannot create poll that ends in past');
         }
 
-        const exists = await this.AssetExists(ctx, id);
-        if (exists) {
-            const assetString = await this.ReadAsset(ctx, id);
-            const asset = JSON.parse(assetString);
-            if(asset.isFinal)
-                return  JSON.stringify({error:"Cannot Owerride final vote"});
-        }
+        console.log('JSON.stringify', JSON.stringify({pollName, pollStart, pollEnd, candidates, isVoteFinal}));
 
-        const asset = {
+        const id = uuidv5(JSON.stringify({pollName, pollStart, pollEnd, candidates, isVoteFinal}), uuidv5.URL);
+
+        const poll = {
             ID: id,
-            optionId: optionId ,
-            optionName: optionName,
-            statData: statData,
-            voteDate: voteDate,
-            isFinal: isFinal
+            type: 'poll',
+            name: pollName,
+            start: pollStart,
+            end: pollEnd,
+            candidates: candidates,
+            isVoteFinal: isVoteFinal
         };
-        ctx.stub.putState(id, Buffer.from(JSON.stringify(asset)));
-        return JSON.stringify(`Voted to ${asset.optionId}:${optionName}`);
+
+        console.info(`Created new poll: ${JSON.stringify(poll)}`);
+
+        ctx.stub.putState(poll.ID, Buffer.from(JSON.stringify(poll)));
+        return JSON.stringify(poll);
+    }
+
+    async Vote(ctx, identity, optionIndex, pollId) {
+        console.info(`Vote: optionIndex: ${optionIndex}, pollId: ${pollId}`);
+
+        const poll = JSON.parse(await this.ReadAsset(ctx, pollId));
+        let now = new Date();
+
+        if (!poll) {
+            console.info(`No poll found`);
+            throw new Error('No poll found');
+        } else if (now > poll.end) {
+            console.info(`Poll is over`);
+            throw new Error('Poll is over');
+        } else if (now < poll.start) {
+            console.info(`Poll has not started yet`);
+            throw new Error('Poll has not started yet');
+        }
+
+        const id = uuidv5(JSON.stringify({identity, pollId}), uuidv5.URL);
+
+        const vote = {
+            ID: id,
+            type: 'vote',
+            pollId: pollId,
+            optionIndex: optionIndex,
+        };
+
+        ctx.stub.putState(vote.ID, Buffer.from(JSON.stringify(vote)));
+        return JSON.stringify(vote);
     }
 
     // ReadAsset returns the asset stored in the world state with given id.
@@ -85,13 +115,13 @@ class AssetTransfer extends Contract {
     }
 
     // DeleteAsset deletes an given asset from the world state.
-    async DeleteAsset(ctx, id) {
-        const exists = await this.AssetExists(ctx, id);
-        if (!exists) {
-            throw new Error(`The asset ${id} does not exist`);
-        }
-        return ctx.stub.deleteState(id);
-    }
+    // async DeleteAsset(ctx, id) {
+    //     const exists = await this.AssetExists(ctx, id);
+    //     if (!exists) {
+    //         throw new Error(`The asset ${id} does not exist`);
+    //     }
+    //     return ctx.stub.deleteState(id);
+    // }
 
     // AssetExists returns true when asset with given ID exists in world state.
     async AssetExists(ctx, id) {
@@ -115,7 +145,7 @@ class AssetTransfer extends Contract {
                 console.log(err);
                 record = strValue;
             }
-            allResults.push({ Key: result.value.key, Record: record });
+            allResults.push({Key: result.value.key, Record: record});
             result = await iterator.next();
         }
         return JSON.stringify(allResults);
