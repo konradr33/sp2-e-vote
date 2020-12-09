@@ -4,21 +4,37 @@ const {Contract} = require('fabric-contract-api');
 const {v5: uuidv5} = require('uuid');
 
 class AssetTransfer extends Contract {
-
+    // Add few polls
+    // Example usage: '{"function":"InitLedger","Args":[]}'
     async InitLedger(ctx) {
-        const assets = [];
+        const assets = [
+            {
+                ID: '16b2e1b1-4798-5382-bcdd-9e0c599d5f20',
+                type: 'poll',
+                name: 'poll1',
+                start: new Date(2020, 5, 1).getTime(),
+                end: new Date(2021, 5, 1).getTime(),
+                candidates: ["candidate1", "candidate2"],
+                isVoteFinal: true,
+            }, {
+                ID: '36b2e1b1-4798-5382-bcdd-9e0c599d5f20',
+                type: 'poll',
+                name: 'poll2',
+                start: new Date(2019, 5, 1).getTime(),
+                end: new Date(2020, 12, 24).getTime(),
+                candidates: ["candidate4", "candidate5"],
+                isVoteFinal: false,
+            }
+        ];
 
-        this.start = new Date(2020, 5, 1);
-        this.estop = new Date(2020, 11, 20);
-        this.stop = new Date(2020, 11, 22);
-
-        // for (const asset of assets) {
-        //     asset.docType = 'asset';
-        //     await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
-        //     console.info(`Asset ${asset.ID} initialized`);
-        // }
+        for (const asset of assets) {
+            await ctx.stub.putState(asset.ID, Buffer.from(JSON.stringify(asset)));
+            console.info(`Asset ${asset.ID} initialized`);
+        }
     }
 
+    // Add poll
+    // Example usage: '{"function":"CreatePoll","Args":["poll1","1607539400070","1609528834609","[\"cand1\",\"cand2\"]","false"]}'
     async CreatePoll(ctx, pollName, pollStart, pollEnd, candidates, isVoteFinal) {
         pollStart = parseInt(pollStart);
         pollEnd = parseInt(pollEnd);
@@ -57,6 +73,8 @@ class AssetTransfer extends Contract {
         return JSON.stringify(poll);
     }
 
+    // Vote for candidate in poll
+    // Example usage: '{"function":"Vote","Args":["me", "3", "60852e31-a55e-5915-b615-ca32cdeb4a85"]}'
     async Vote(ctx, identity, optionIndex, pollId) {
         console.info(`Vote: optionIndex: ${optionIndex}, pollId: ${pollId}`);
 
@@ -130,9 +148,10 @@ class AssetTransfer extends Contract {
     }
 
 
-    // GetAllAssets returns all assets found in the world state.
+    // GetAllVotes returns all votes found in the world state.
+    // Example usage: '{"function":"GetAllVotes","Args":[]}'
     async GetAllVotes(ctx) {
-        const allResults = [];
+        const allVotes = [];
         // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
         const iterator = await ctx.stub.getStateByRange('', '');
         let result = await iterator.next();
@@ -141,17 +160,47 @@ class AssetTransfer extends Contract {
             let record;
             try {
                 record = JSON.parse(strValue);
+                console.info(`parsed obj ${JSON.stringify(record)}, record.type: ${record.type}`);
+
+                if (record.type === "vote") {
+                    console.info(`adding ${record.name}`)
+                    allVotes.push({Key: result.value.key, Record: record});
+                }
             } catch (err) {
                 console.log(err);
                 record = strValue;
             }
-            allResults.push({Key: result.value.key, Record: record});
             result = await iterator.next();
         }
-        return JSON.stringify(allResults);
+        return JSON.stringify(allVotes);
     }
 
+    // GetAllPolls returns all polls found in the world state.
+    // Example usage '{"function":"GetAllPolls","Args":[]}'
+    async GetAllPolls(ctx) {
+        const allPolls = [];
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+                console.info(`parsed obj ${JSON.stringify(record)}, record.type: ${record.type}`);
 
+                if (record.type === "poll") {
+                    console.info(`adding ${record.name}`)
+                    allPolls.push({Key: result.value.key, Record: record});
+                }
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            result = await iterator.next();
+        }
+        return JSON.stringify(allPolls);
+    }
 }
 
 module.exports = AssetTransfer;
