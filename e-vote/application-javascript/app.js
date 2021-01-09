@@ -148,8 +148,12 @@ async function main() {
 
             // get exact poll
             app.get('/polls/:id', async (req, res) => {
-                let result = await contract.evaluateTransaction('ReadAsset',req.params.id);
-                res.send(result);
+                try {
+                    let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
+                    res.send(result);
+                } catch (e) {
+                    res.sendStatus(404);
+                }
             });
 
             // Return all votes
@@ -160,8 +164,12 @@ async function main() {
 
             // Return exact vote
             app.get('/votes/:id', async (req, res) => {
-                let result = await contract.evaluateTransaction('ReadAsset',req.params.id);
-                res.send(result);
+                try {
+                    let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
+                    res.send(result);
+                } catch (e) {
+                    res.sendStatus(404);
+                }
             });
 
             // vote
