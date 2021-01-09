@@ -130,13 +130,48 @@ async function main() {
                 res.send(result);
             });
 
+            // create poll
+            // example body:
+            // {
+            //     "pollName":"generated poll",
+            //     "pollStart":"1609980425080",
+            //     "pollEnd":"1609980426080",
+            //     "candidates":["cand1","cand2"],
+            //     "isVoteFinal":"true",
+            //     "publicKey":"",
+            //     "signature":""
+            // }
+            app.post('/polls', async (req, res) => {
+                let result = await contract.submitTransaction('CreatePoll', req.body.pollName, req.body.pollStart, req.body.pollEnd, req.body.candidates, req.body.isVoteFinal);
+                res.send(result);
+            });
+
+            // get exact poll
+            app.get('/polls/:id', async (req, res) => {
+                let result = await contract.evaluateTransaction('ReadAsset',req.params.id);
+                res.send(result);
+            });
+
             // Return all votes
             app.get('/votes', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllVotes');
                 res.send(result);
             });
 
-            // vote in poll
+            // Return exact vote
+            app.get('/votes/:id', async (req, res) => {
+                let result = await contract.evaluateTransaction('ReadAsset',req.params.id);
+                res.send(result);
+            });
+
+            // vote
+            // example body:
+            // {
+            //     "pollId":"16b2e1b1-4798-5382-bcdd-9e0c599d5f20",
+            //     "optionIndex":1,
+            //     "publicKey":"",
+            //     "signature":""
+            // }
             app.post('/votes', async (req, res) => {
                 let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
                 res.send(result);
