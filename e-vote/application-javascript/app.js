@@ -186,7 +186,7 @@ async function main() {
             });
 
             app.listen(port, () => {
-                console.log(`Example app listening at http://localhost:${port}`)
+                console.log(`E-vote app listening at http://localhost:${port}`)
             });
 
             process.on('SIGTERM', () => {

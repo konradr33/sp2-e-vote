@@ -14,7 +14,7 @@ class AssetTransfer extends Contract {
                 name: 'poll1',
                 start: new Date(2020, 5, 1).getTime(),
                 end: new Date(2021, 5, 1).getTime(),
-                candidates: ["candidate1", "candidate2"],
+                candidates: ['candidate1', 'candidate2'],
                 isVoteFinal: true,
             }, {
                 ID: '36b2e1b1-4798-5382-bcdd-9e0c599d5f20',
@@ -22,7 +22,7 @@ class AssetTransfer extends Contract {
                 name: 'poll2',
                 start: new Date(2019, 5, 1).getTime(),
                 end: new Date(2020, 12, 24).getTime(),
-                candidates: ["candidate4", "candidate5"],
+                candidates: ['candidate4', 'candidate5'],
                 isVoteFinal: false,
             }
         ];
@@ -38,18 +38,18 @@ class AssetTransfer extends Contract {
     async CreatePoll(ctx, pollName, pollStart, pollEnd, candidates, isVoteFinal) {
         pollStart = parseInt(pollStart);
         pollEnd = parseInt(pollEnd);
-        isVoteFinal = isVoteFinal == 'true';
-        candidates = JSON.parse(candidates);
+        isVoteFinal = isVoteFinal === 'true';
+        // candidates = JSON.parse(candidates);
 
         console.info(`CreatePoll: pollName: ${pollName}, pollStart: ${pollStart}, pollEnd: ${pollEnd}, candidates: ${candidates.toString()}, isVoteFinal: ${isVoteFinal}`);
 
         let now = new Date();
 
         if (now > pollStart) {
-            console.info(`Cannot create poll that starts in past`);
+            console.info('Cannot create poll that starts in past');
             throw new Error('Cannot create poll that starts in past');
         } else if (now > pollEnd) {
-            console.info(`Cannot create poll that ends in past`);
+            console.info('Cannot create poll that ends in past');
             throw new Error('Cannot create poll that ends in past');
         }
 
@@ -82,13 +82,13 @@ class AssetTransfer extends Contract {
         let now = new Date();
 
         if (!poll) {
-            console.info(`No poll found`);
+            console.info('No poll found');
             throw new Error('No poll found');
         } else if (now > poll.end) {
-            console.info(`Poll is over`);
+            console.info('Poll is over');
             throw new Error('Poll is over');
         } else if (now < poll.start) {
-            console.info(`Poll has not started yet`);
+            console.info('Poll has not started yet');
             throw new Error('Poll has not started yet');
         }
 
@@ -162,9 +162,9 @@ class AssetTransfer extends Contract {
                 record = JSON.parse(strValue);
                 console.info(`parsed obj ${JSON.stringify(record)}, record.type: ${record.type}`);
 
-                if (record.type === "vote") {
-                    console.info(`adding ${record.name}`)
-                    allVotes.push({Key: result.value.key, Record: record});
+                if (record.type === 'vote') {
+                    console.info(`adding ${record.name}`);
+                    allVotes.push(record);
                 }
             } catch (err) {
                 console.log(err);
@@ -189,9 +189,9 @@ class AssetTransfer extends Contract {
                 record = JSON.parse(strValue);
                 console.info(`parsed obj ${JSON.stringify(record)}, record.type: ${record.type}`);
 
-                if (record.type === "poll") {
-                    console.info(`adding ${record.name}`)
-                    allPolls.push({Key: result.value.key, Record: record});
+                if (record.type === 'poll') {
+                    console.info(`adding ${record.name}`);
+                    allPolls.push(record);
                 }
             } catch (err) {
                 console.log(err);
