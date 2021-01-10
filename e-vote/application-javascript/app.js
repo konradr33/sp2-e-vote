@@ -127,7 +127,7 @@ async function main() {
             // Return all polls
             app.get('/polls', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllPolls');
-                res.send(result);
+                res.json(result.toString());
             });
 
             // create poll
@@ -143,14 +143,14 @@ async function main() {
             // }
             app.post('/polls', async (req, res) => {
                 let result = await contract.submitTransaction('CreatePoll', req.body.pollName, req.body.pollStart, req.body.pollEnd, req.body.candidates, req.body.isVoteFinal);
-                res.send(result);
+                res.json(result.toString());
             });
 
             // get exact poll
             app.get('/polls/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.send(result);
+                    res.json(result.toString());
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -159,14 +159,14 @@ async function main() {
             // Return all votes
             app.get('/votes', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllVotes');
-                res.send(result);
+                res.json(result.toString());
             });
 
             // Return exact vote
             app.get('/votes/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.send(result);
+                    res.json(result.toString());
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -182,7 +182,7 @@ async function main() {
             // }
             app.post('/votes', async (req, res) => {
                 let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
-                res.send(result);
+                res.json(result.toString());
             });
 
             app.listen(port, () => {
