@@ -1,0 +1,9 @@
+<h3> Dodaj nowe głosowanie</h3>
+nazwa <input [(ngModel)]="name"><br>
+początek <input type="datetime-local" [(ngModel)]="start"><br>
+koniec <input type="datetime-local" [(ngModel)]="end"><br>
+Kandydaci: <button (click)="addCandidate()">Dodaj</button>
+<input *ngFor="let candidate of candidateNr; let i=index" [(ngModel)]="candidates[i]"><br>
+finalVote: <select [(ngModel)]="finalVote"><option value="true">Tak</option><option value="false">Nie</option></select><br>
+
+<button (click)="addPoll()">dodaj</button>

@@ -15,6 +15,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
+app.use(function(req, res, next) {
+
+    res.header("Access-Control-Allow-Origin", "*");
+
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    next();
+
+});
 const port = 3000;
 const channelName = 'mychannel';
 const chaincodeName = 'e-vote';
@@ -25,6 +34,8 @@ const org1UserId = 'appUser';
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
 }
+
+
 
 // pre-requisites:
 // - fabric-sample two organization test-network setup with two peers, ordering service,

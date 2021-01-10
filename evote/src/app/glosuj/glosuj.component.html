@@ -1,0 +1,10 @@
+<h1>Kampania: {{poll.name}}</h1>
+możliwość głosowania od: {{poll.start|date}} do {{poll.end|date}}
+
+<h2>Kandydaci</h2>
+<ul>
+  <li *ngFor="let candidate of  poll.candidates; let i = index ">
+    {{candidate}} <button (click)="vote(i)">Głosuj</button>
+  </li>
+</ul>
+
