@@ -15,7 +15,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 
     res.header("Access-Control-Allow-Origin", "*");
 
@@ -34,7 +34,6 @@ const org1UserId = 'appUser';
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
 }
-
 
 
 // pre-requisites:
@@ -138,7 +137,7 @@ async function main() {
             // Return all polls
             app.get('/polls', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllPolls');
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             // create poll
@@ -153,15 +152,16 @@ async function main() {
             //     "signature":""
             // }
             app.post('/polls', async (req, res) => {
-                let result = await contract.submitTransaction('CreatePoll', req.body.pollName, req.body.pollStart, req.body.pollEnd, req.body.candidates, req.body.isVoteFinal);
-                res.json(result.toString());
+                let result = await contract.submitTransaction('CreatePoll', req.body.pollName,
+                    req.body.pollStart, req.body.pollEnd, JSON.stringify(req.body.candidates), req.body.isVoteFinal);
+                res.json(JSON.parse(result.toString()));
             });
 
             // get exact poll
             app.get('/polls/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.json(result.toString());
+                    res.json(JSON.parse(result.toString()));
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -170,14 +170,14 @@ async function main() {
             // Return all votes
             app.get('/votes', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllVotes');
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             // Return exact vote
             app.get('/votes/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.json(result.toString());
+                    res.json(JSON.parse(result.toString()));
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -193,7 +193,7 @@ async function main() {
             // }
             app.post('/votes', async (req, res) => {
                 let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             app.listen(port, () => {

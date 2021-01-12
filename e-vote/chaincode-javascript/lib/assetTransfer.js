@@ -39,7 +39,7 @@ class AssetTransfer extends Contract {
         pollStart = parseInt(pollStart);
         pollEnd = parseInt(pollEnd);
         isVoteFinal = isVoteFinal === 'true';
-        // candidates = JSON.parse(candidates);
+        candidates = JSON.parse(candidates);
 
         console.info(`CreatePoll: pollName: ${pollName}, pollStart: ${pollStart}, pollEnd: ${pollEnd}, candidates: ${candidates.toString()}, isVoteFinal: ${isVoteFinal}`);
 
