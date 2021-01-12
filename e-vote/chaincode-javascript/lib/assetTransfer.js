@@ -114,39 +114,11 @@ class AssetTransfer extends Contract {
         return assetJSON.toString();
     }
 
-    // UpdateAsset updates an existing asset in the world state with provided parameters.
-    async UpdateAsset(ctx, id, color, size, owner, appraisedValue) {
-        const exists = await this.AssetExists(ctx, id);
-        if (!exists) {
-            throw new Error(`The asset ${id} does not exist`);
-        }
-
-        // overwriting original asset with new asset
-        const updatedAsset = {
-            ID: id,
-            Color: color,
-            Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,
-        };
-        return ctx.stub.putState(id, Buffer.from(JSON.stringify(updatedAsset)));
-    }
-
-    // DeleteAsset deletes an given asset from the world state.
-    // async DeleteAsset(ctx, id) {
-    //     const exists = await this.AssetExists(ctx, id);
-    //     if (!exists) {
-    //         throw new Error(`The asset ${id} does not exist`);
-    //     }
-    //     return ctx.stub.deleteState(id);
-    // }
-
     // AssetExists returns true when asset with given ID exists in world state.
     async AssetExists(ctx, id) {
         const assetJSON = await ctx.stub.getState(id);
         return assetJSON && assetJSON.length > 0;
     }
-
 
     // GetAllVotes returns all votes found in the world state.
     // Example usage: '{"function":"GetAllVotes","Args":[]}'
