@@ -7,8 +7,8 @@
   </tr>
   <tr *ngFor="let poll of this.polls">
     <td>{{poll.name}}</td>
-    <td>{{poll.start|date: "short"}}</td>
-    <td>{{poll.end |date: "short"}}</td>
+    <td>{{poll.start|date: "dd/MM/yyyy HH:mm":"+1"}}</td>
+    <td>{{poll.end |date: "dd/MM/yyyy HH:mm":"+1"}}</td>
     <td>
       <button (click)="voteForm(poll.ID)" *ngIf="during(poll.start,poll.end)" >głosuj</button>
     </td>

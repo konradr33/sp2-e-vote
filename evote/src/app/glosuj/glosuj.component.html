@@ -1,6 +1,6 @@
 <ng-container *ngIf="poll">
   <h1>Kampania: {{poll.name}}</h1>
-  możliwość głosowania od: {{poll.start|date: "short"}} do {{poll.end|date: "short"}}
+  możliwość głosowania od: {{poll.start|date: "dd/MM/yyyy HH:mm":"+1"}} do {{poll.end|date: "dd/MM/yyyy HH:mm":"+1"}}
 
   <ng-container *ngIf="!waiting else wait">
     <h2>Kandydaci</h2>
