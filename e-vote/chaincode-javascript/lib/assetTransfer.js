@@ -175,6 +175,58 @@ class AssetTransfer extends Contract {
         return JSON.stringify(allVotes);
     }
 
+
+    async GetPollResults(ctx, pollId) {
+        const poll = JSON.parse(await this.ReadAsset(ctx, pollId));
+        //@TODO: uncomment after tests to hide results before vote end
+        // if (!poll) {
+        //     console.info('No poll found');
+        //     throw new Error('No poll found');
+        // } else if (now < poll.end) {
+        //     console.info('Poll is not over yet!');
+        //     let res={
+        //         "status":"Poll is not over yet!"
+        //     };
+        //     return JSON.stringify(res);
+        // }
+
+        let results = [];
+        for (let candidateIndex in poll.candidates){
+            results[candidateIndex] = 0;
+        }
+        // range query with empty string for startKey and endKey does an open-ended query of all assets in the chaincode namespace.
+        const iterator = await ctx.stub.getStateByRange('', '');
+        let result = await iterator.next();
+        while (!result.done) {
+            const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+                console.info(`parsed obj ${JSON.stringify(record)}, record.type: ${record.type}`);
+
+                if (record.type === 'vote' && record.pollId === pollId) {
+                    console.info(`adding ${record.name}`);
+                    results[record.optionIndex]+=1;
+                }
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            result = await iterator.next();
+        }
+
+        let res={
+            "status":"ok",
+            "results":{},
+            "debug":[poll, results]
+        };
+        for (let candidate in poll.candidates){
+            res.results[poll.candidates[candidate]] = results[candidate];
+        }
+
+        return JSON.stringify(res);
+    }
+
     // GetAllPolls returns all polls found in the world state.
     // Example usage '{"function":"GetAllPolls","Args":[]}'
     async GetAllPolls(ctx) {

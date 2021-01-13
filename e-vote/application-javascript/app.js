@@ -29,7 +29,20 @@ const channelName = 'mychannel';
 const chaincodeName = 'e-vote';
 const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
-const org1UserId = 'appUser';
+
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+//Every app restart creates new user to vote,
+const org1UserId = 'User'+makeid(5);
+
+
 
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
@@ -177,6 +190,16 @@ async function main() {
             app.get('/votes/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
+                    res.json(result.toString());
+                } catch (e) {
+                    res.sendStatus(404);
+                }
+            });
+
+            // Return exact vote results
+            app.get('/results/:id', async (req, res) => {
+                try {
+                    let result = await contract.evaluateTransaction('GetPollResults', req.params.id);
                     res.json(result.toString());
                 } catch (e) {
                     res.sendStatus(404);

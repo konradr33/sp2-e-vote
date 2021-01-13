@@ -7,7 +7,7 @@ import {CheckVoteComponent} from './check-vote/check-vote.component';
 import {AddPollComponent} from './add-poll/add-poll.component';
 
 const routes: Routes = [
-  {path: 'wyniki', component: WynikiComponent},
+  {path: 'wyniki/:id', component: WynikiComponent},
   {path: 'glosowania', component: GlosowaniaComponent},
   {path: 'glosuj/:id', component: GlosujComponent},
   {path: 'checkVote/:id', component: CheckVoteComponent},

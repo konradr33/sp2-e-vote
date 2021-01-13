@@ -1,10 +1,22 @@
 <h1>Kampania: {{poll.name}}</h1>
 możliwość głosowania od: {{poll.start|date}} do {{poll.end|date}}
 
-<h2>Kandydaci</h2>
-<ul>
-  <li *ngFor="let candidate of  poll.candidates; let i = index ">
-    {{candidate}} <button (click)="vote(i)">Głosuj</button>
-  </li>
-</ul>
+<ng-container *ngIf="!waiting else wait">
+  <h2>Kandydaci</h2>
+  <ul >
+    <li *ngFor="let candidate of  poll.candidates; let i = index ">
+      {{candidate}} <button (click)="vote(i)">Głosuj</button>
+    </li>
+  </ul>
+</ng-container>
+
+
+<ng-template #wait>
+  <h1>Głosowanie</h1>
+  <h3 *ngIf="!voteId else voted">poczekaj na identyfikator</h3>
+  <ng-template #voted>
+    <h3> twój identyfikator głosu:</h3>
+    <h1>{{voteId}}</h1>
+  </ng-template>
+</ng-template>
 

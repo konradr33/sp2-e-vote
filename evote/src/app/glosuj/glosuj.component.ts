@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
-import {PoolRecord} from '../glosowania/glosowania.component';
+import {Poll} from '../glosowania/glosowania.component';
 
 @Component({
   selector: 'app-glosuj',
@@ -11,8 +11,10 @@ import {PoolRecord} from '../glosowania/glosowania.component';
 export class GlosujComponent implements OnInit {
 
   constructor(private http: HttpClient, private ar: ActivatedRoute) { }
-  poll: PoolRecord;
+  poll: Poll;
   id = '';
+  waiting: boolean = false;
+  voteId: string;
 
   ngOnInit(): void {
     this.id = this.ar.snapshot.params.id;
@@ -38,13 +40,14 @@ export class GlosujComponent implements OnInit {
       publicKey: '',
       signature: ''
     };
-
+    this.waiting = true;
     this.http.post(
      ' http://localhost:3000/votes/',
       vote
     ).subscribe(
       (x: any) => {
-        alert(JSON.parse(x).ID);
+        this.voteId = JSON.parse(x).ID;
+
       }
     );
   }

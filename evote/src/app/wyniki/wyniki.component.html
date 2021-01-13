@@ -1,5 +1,7 @@
-<p>wyniki works!</p>
+<h1>Wyniki głosowania</h1>
+
+<ul>
+  <li *ngFor="let item of (results | keyvalue)">{{item.key}}: {{item.value}}</li>
+</ul>
 
 
-
-{{str(votes)}}
