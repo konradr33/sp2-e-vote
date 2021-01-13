@@ -20,9 +20,9 @@ export class CheckVoteComponent implements OnInit {
     this.id = this.ar.snapshot.params.id;
 
     this.getVote().subscribe((x: any) => {
-      this.vote = JSON.parse(x) ;
+      this.vote = x;
       this.getPoll(this.vote.pollId).subscribe((xx:any) => {
-        this.poll = JSON.parse(xx);
+        this.poll = xx;
       });
     })
 

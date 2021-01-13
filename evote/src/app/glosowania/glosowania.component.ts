@@ -16,8 +16,7 @@ export class GlosowaniaComponent implements OnInit {
 
   ngOnInit(): void {
     this.getPolls().subscribe((polls: any) => {
-     this.polls = JSON.parse(polls);
-     console.log(this.polls);
+     this.polls = polls;
     });
 
   }

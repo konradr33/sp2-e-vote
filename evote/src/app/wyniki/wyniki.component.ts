@@ -17,7 +17,7 @@ export class WynikiComponent implements OnInit {
   ngOnInit(): void {
     const id = this.ar.snapshot.params.id;
     this.getResults(id).subscribe((x: any) => {
-      const res = JSON.parse(x);
+      const res = x;
       const status = res.status;
       if ( status === "ok"){
         this.results = res.results;

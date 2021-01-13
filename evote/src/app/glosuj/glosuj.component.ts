@@ -20,7 +20,7 @@ export class GlosujComponent implements OnInit {
     this.id = this.ar.snapshot.params.id;
 
     this.getPoll().subscribe((poll: any) => {
-      this.poll = JSON.parse(poll);
+      this.poll = poll;
       console.log(poll);
     });
 
@@ -46,7 +46,7 @@ export class GlosujComponent implements OnInit {
       vote
     ).subscribe(
       (x: any) => {
-        this.voteId = JSON.parse(x).ID;
+        this.voteId = x.ID;
 
       }
     );

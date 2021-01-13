@@ -149,7 +149,7 @@ async function main() {
             app.get('/results/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('GetPollResults', req.params.id);
-                    res.json(result.toString());
+                    res.json(JSON.parse(result.toString()));
                 } catch (e) {
                     res.sendStatus(404);
                 }
