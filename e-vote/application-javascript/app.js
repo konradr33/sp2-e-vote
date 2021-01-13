@@ -22,17 +22,17 @@ const mspOrg1 = 'Org1MSP';
 const walletPath = path.join(__dirname, 'wallet');
 
 function makeid(length) {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
+    for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
 }
-//Every app restart creates new user to vote,
-const org1UserId = 'User'+makeid(5);
 
+//Every app restart creates new user to vote,
+const org1UserId = 'User' + makeid(5);
 
 
 app.use(function (req, res, next) {
@@ -114,9 +114,13 @@ async function main() {
             //     "signature":""
             // }
             app.post('/polls', async (req, res) => {
-                let result = await contract.submitTransaction('CreatePoll', req.body.pollName,
-                    req.body.pollStart, req.body.pollEnd, JSON.stringify(req.body.candidates), req.body.isVoteFinal);
-                res.json(JSON.parse(result.toString()));
+                try {
+                    let result = await contract.submitTransaction('CreatePoll', req.body.pollName,
+                        req.body.pollStart, req.body.pollEnd, JSON.stringify(req.body.candidates), req.body.isVoteFinal);
+                    res.json(JSON.parse(result.toString()));
+                } catch (e) {
+                    res.sendStatus(400);
+                }
             });
 
             // get exact poll
@@ -164,8 +168,12 @@ async function main() {
             //     "signature":""
             // }
             app.post('/votes', async (req, res) => {
-                let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
-                res.json(JSON.parse(result.toString()));
+                try {
+                    let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
+                    res.json(JSON.parse(result.toString()));
+                } catch (e) {
+                    res.sendStatus(400);
+                }
             });
 
             app.listen(port, () => {
