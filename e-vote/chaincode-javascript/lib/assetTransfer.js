@@ -74,8 +74,9 @@ class AssetTransfer extends Contract {
     }
 
     // Vote for candidate in poll
-    // Example usage: '{"function":"Vote","Args":["me", "3", "60852e31-a55e-5915-b615-ca32cdeb4a85"]}'
+    // Example usage: '{"function":"Vote","Args":["me", 3, "60852e31-a55e-5915-b615-ca32cdeb4a85"]}'
     async Vote(ctx, identity, optionIndex, pollId) {
+        optionIndex = parseInt(optionIndex);
         console.info(`Vote: optionIndex: ${optionIndex}, pollId: ${pollId}`);
 
         const poll = JSON.parse(await this.ReadAsset(ctx, pollId));
@@ -90,6 +91,9 @@ class AssetTransfer extends Contract {
         } else if (now < poll.start) {
             console.info('Poll has not started yet');
             throw new Error('Poll has not started yet');
+        } else if (optionIndex >= poll.candidates.length) {
+            console.info('Incorrect candidate index');
+            throw new Error('Incorrect candidate index');
         }
 
         const id = uuidv5(JSON.stringify({identity, pollId}), uuidv5.URL);
