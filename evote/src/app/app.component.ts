@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { AppRoutingModule} from './app-routing.module';
+import {Component} from '@angular/core';
+import {AppRoutingModule} from './app-routing.module';
 import {Router} from '@angular/router';
 
 @Component({
@@ -17,6 +17,8 @@ export class AppComponent {
 
   check() {
     let id = prompt("Podaj ID głosu", '');
-    this.router.navigate(['checkVote', id]);
+    if (id) {
+      this.router.navigate(['checkVote', id]);
+    }
   }
 }
