@@ -1,7 +1,7 @@
 <div id="glosowania">
   <ol>
     <li *ngFor="let poll of this.polls">
-      {{poll.name}}, od: {{poll.start|date}} do: {{poll.end | date}}
+      {{poll.name}}, od: {{poll.start|date: "short"}} do: {{poll.end |date: "short"}}
       <button (click)="voteForm(poll.ID)" *ngIf="during(poll.start,poll.end)" >głosuj</button>
       <button (click)="results(poll.ID)" *ngIf="true || after(poll.end)" >wyniki</button>
     </li>

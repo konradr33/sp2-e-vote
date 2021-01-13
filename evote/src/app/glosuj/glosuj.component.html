@@ -1,15 +1,17 @@
-<h1>Kampania: {{poll.name}}</h1>
-możliwość głosowania od: {{poll.start|date}} do {{poll.end|date}}
+<ng-container *ngIf="poll">
+  <h1>Kampania: {{poll.name}}</h1>
+  możliwość głosowania od: {{poll.start|date: "short"}} do {{poll.end|date: "short"}}
 
-<ng-container *ngIf="!waiting else wait">
-  <h2>Kandydaci</h2>
-  <ul >
-    <li *ngFor="let candidate of  poll.candidates; let i = index ">
-      {{candidate}} <button (click)="vote(i)">Głosuj</button>
-    </li>
-  </ul>
+  <ng-container *ngIf="!waiting else wait">
+    <h2>Kandydaci</h2>
+    <ul>
+      <li *ngFor="let candidate of  poll.candidates; let i = index ">
+        {{candidate}}
+        <button (click)="vote(i)">Głosuj</button>
+      </li>
+    </ul>
+  </ng-container>
 </ng-container>
-
 
 <ng-template #wait>
   <h1>Głosowanie</h1>
