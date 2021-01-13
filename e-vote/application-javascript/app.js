@@ -15,15 +15,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use(function(req, res, next) {
-
-    res.header("Access-Control-Allow-Origin", "*");
-
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
-    next();
-
-});
 const port = 3000;
 const channelName = 'mychannel';
 const chaincodeName = 'e-vote';
@@ -44,59 +35,16 @@ const org1UserId = 'User'+makeid(5);
 
 
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 function prettyJSONString(inputString) {
     return JSON.stringify(JSON.parse(inputString), null, 2);
 }
 
-
-
-// pre-requisites:
-// - fabric-sample two organization test-network setup with two peers, ordering service,
-//   and 2 certificate authorities
-//         ===> from directory /fabric-samples/test-network
-//         ./network.sh up createChannel -ca
-// - Use any of the asset-transfer-basic chaincodes deployed on the channel "mychannel"
-//   with the chaincode name of "basic". The following deploy command will package,
-//   install, approve, and commit the javascript chaincode, all the actions it takes
-//   to deploy a chaincode to a channel.
-//         ===> from directory /fabric-samples/test-network
-//         ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-javascript/ -ccl javascript
-// - Be sure that node.js is installed
-//         ===> from directory /fabric-samples/asset-transfer-basic/application-javascript
-//         node -v
-// - npm installed code dependencies
-//         ===> from directory /fabric-samples/asset-transfer-basic/application-javascript
-//         npm install
-// - to run this test application
-//         ===> from directory /fabric-samples/asset-transfer-basic/application-javascript
-//         node app.js
-
-// NOTE: If you see  kind an error like these:
-/*
-    2020-08-07T20:23:17.590Z - error: [DiscoveryService]: send[mychannel] - Channel:mychannel received discovery error:access denied
-    ******** FAILED to run the application: Error: DiscoveryService: mychannel error: access denied
-
-   OR
-
-   Failed to register user : Error: fabric-ca request register failed with errors [[ { code: 20, message: 'Authentication failure' } ]]
-   ******** FAILED to run the application: Error: Identity not found in wallet: appUser
-*/
-// Delete the /fabric-samples/asset-transfer-basic/application-javascript/wallet directory
-// and retry this application.
-//
-// The certificate authority must have been restarted and the saved certificates for the
-// admin and application user are not valid. Deleting the wallet store will force these to be reset
-// with the new certificate authority.
-//
-
-/**
- *  A test application to show basic queries operations with any of the asset-transfer-basic chaincodes
- *   -- How to submit a transaction
- *   -- How to query and check the results
- *
- * To see the SDK workings, try setting the logging to show on the console before running
- *        export HFC_LOGGING='{"debug":"console"}'
- */
 async function main() {
     try {
         // build an in memory object with the network configuration (also known as a connection profile)
@@ -144,14 +92,14 @@ async function main() {
             // an "init" type function.
             console.log('\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger');
             await contract.submitTransaction('InitLedger');
-            console.log('*** Result: committed');
+            console.log('*** InitLedger: committed');
 
             app.use(bodyParser.json());
 
             // Return all polls
             app.get('/polls', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllPolls');
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             // create poll
@@ -166,15 +114,16 @@ async function main() {
             //     "signature":""
             // }
             app.post('/polls', async (req, res) => {
-                let result = await contract.submitTransaction('CreatePoll', req.body.pollName, req.body.pollStart, req.body.pollEnd, req.body.candidates, req.body.isVoteFinal);
-                res.json(result.toString());
+                let result = await contract.submitTransaction('CreatePoll', req.body.pollName,
+                    req.body.pollStart, req.body.pollEnd, JSON.stringify(req.body.candidates), req.body.isVoteFinal);
+                res.json(JSON.parse(result.toString()));
             });
 
             // get exact poll
             app.get('/polls/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.json(result.toString());
+                    res.json(JSON.parse(result.toString()));
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -183,14 +132,14 @@ async function main() {
             // Return all votes
             app.get('/votes', async (req, res) => {
                 let result = await contract.evaluateTransaction('GetAllVotes');
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             // Return exact vote
             app.get('/votes/:id', async (req, res) => {
                 try {
                     let result = await contract.evaluateTransaction('ReadAsset', req.params.id);
-                    res.json(result.toString());
+                    res.json(JSON.parse(result.toString()));
                 } catch (e) {
                     res.sendStatus(404);
                 }
@@ -216,7 +165,7 @@ async function main() {
             // }
             app.post('/votes', async (req, res) => {
                 let result = await contract.submitTransaction('Vote', org1UserId, req.body.optionIndex, req.body.pollId);
-                res.json(result.toString());
+                res.json(JSON.parse(result.toString()));
             });
 
             app.listen(port, () => {

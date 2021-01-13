@@ -39,7 +39,7 @@ class AssetTransfer extends Contract {
         pollStart = parseInt(pollStart);
         pollEnd = parseInt(pollEnd);
         isVoteFinal = isVoteFinal === 'true';
-        // candidates = JSON.parse(candidates);
+        candidates = JSON.parse(candidates);
 
         console.info(`CreatePoll: pollName: ${pollName}, pollStart: ${pollStart}, pollEnd: ${pollEnd}, candidates: ${candidates.toString()}, isVoteFinal: ${isVoteFinal}`);
 
@@ -74,8 +74,9 @@ class AssetTransfer extends Contract {
     }
 
     // Vote for candidate in poll
-    // Example usage: '{"function":"Vote","Args":["me", "3", "60852e31-a55e-5915-b615-ca32cdeb4a85"]}'
+    // Example usage: '{"function":"Vote","Args":["me", 3, "60852e31-a55e-5915-b615-ca32cdeb4a85"]}'
     async Vote(ctx, identity, optionIndex, pollId) {
+        optionIndex = parseInt(optionIndex);
         console.info(`Vote: optionIndex: ${optionIndex}, pollId: ${pollId}`);
 
         const poll = JSON.parse(await this.ReadAsset(ctx, pollId));
@@ -90,6 +91,9 @@ class AssetTransfer extends Contract {
         } else if (now < poll.start) {
             console.info('Poll has not started yet');
             throw new Error('Poll has not started yet');
+        } else if (optionIndex >= poll.candidates.length) {
+            console.info('Incorrect candidate index');
+            throw new Error('Incorrect candidate index');
         }
 
         const id = uuidv5(JSON.stringify({identity, pollId}), uuidv5.URL);
@@ -114,39 +118,11 @@ class AssetTransfer extends Contract {
         return assetJSON.toString();
     }
 
-    // UpdateAsset updates an existing asset in the world state with provided parameters.
-    async UpdateAsset(ctx, id, color, size, owner, appraisedValue) {
-        const exists = await this.AssetExists(ctx, id);
-        if (!exists) {
-            throw new Error(`The asset ${id} does not exist`);
-        }
-
-        // overwriting original asset with new asset
-        const updatedAsset = {
-            ID: id,
-            Color: color,
-            Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,
-        };
-        return ctx.stub.putState(id, Buffer.from(JSON.stringify(updatedAsset)));
-    }
-
-    // DeleteAsset deletes an given asset from the world state.
-    // async DeleteAsset(ctx, id) {
-    //     const exists = await this.AssetExists(ctx, id);
-    //     if (!exists) {
-    //         throw new Error(`The asset ${id} does not exist`);
-    //     }
-    //     return ctx.stub.deleteState(id);
-    // }
-
     // AssetExists returns true when asset with given ID exists in world state.
     async AssetExists(ctx, id) {
         const assetJSON = await ctx.stub.getState(id);
         return assetJSON && assetJSON.length > 0;
     }
-
 
     // GetAllVotes returns all votes found in the world state.
     // Example usage: '{"function":"GetAllVotes","Args":[]}'
